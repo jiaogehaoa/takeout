@@ -4,12 +4,15 @@ import android.widget.Toast;
 
 import com.example.birth.myapplication.base.Constant;
 import com.example.birth.myapplication.base.MyApplication;
+import com.example.birth.myapplication.model.net.bean.GoodsItemBean;
 import com.example.birth.myapplication.model.net.bean.ItemBean;
-import com.example.birth.myapplication.model.net.bean.HomeItem;
 import com.example.birth.myapplication.model.net.requestapi.HomeService;
-import com.example.birth.myapplication.presenter.HomePresenter;
-import com.example.birth.myapplication.ui.fragment.HomeFragment;
+import com.example.birth.myapplication.presenter.GoodsPresenter;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -18,46 +21,43 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by birth on 2017/7/24.
+ * Created by birth on 2017/7/26.
  */
 
-public class RequestHome {
+public class RequestGoods {
 
-    HomePresenter homePresenter;
+    private GoodsPresenter goodsPresenter;
 
-    public RequestHome(HomePresenter homePresenter) {
-        this.homePresenter = homePresenter;
+    public RequestGoods(GoodsPresenter goodsPresenter) {
+        this.goodsPresenter = goodsPresenter;
     }
 
-    public void requestHome(){
+    public void requestGoods(){
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constant.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+        HomeService homeService = retrofit.create(HomeService.class);
 
-        HomeService homeService =retrofit.create(HomeService.class);
+        Call<ItemBean> goods = homeService.goods(goodsPresenter.getSellerId());
 
-        Call<ItemBean> home = homeService.home();
-
-        home.enqueue(new Callback<ItemBean>() {
-
-
-
+        goods.enqueue(new Callback<ItemBean>() {
             @Override
             public void onResponse(Call<ItemBean> call, Response<ItemBean> response) {
-                ItemBean homeBean = response.body();
-
-                if(homeBean!=null &&"0".equals(homeBean.code)){
+                ItemBean body = response.body();
+                if(body !=null && "0".equals(body.code)){
                     Gson gson = new Gson();
-                   HomeItem homeItem = gson.fromJson(homeBean.data, HomeItem.class);
-                    homePresenter.getAdapter().setHomeItem(homeItem);
+                    List<GoodsItemBean> lists = gson.fromJson(body.data,
+                            new TypeToken<List<GoodsItemBean>>() {}.getType());
+                    goodsPresenter.setAdapterData(lists);
+
                 }
 
             }
 
             @Override
             public void onFailure(Call<ItemBean> call, Throwable t) {
-                Toast.makeText(MyApplication.getContext(), "failed", Toast.LENGTH_SHORT).show();
+
             }
         });
 

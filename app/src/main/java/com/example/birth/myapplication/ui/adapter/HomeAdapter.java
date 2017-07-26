@@ -1,6 +1,9 @@
 package com.example.birth.myapplication.ui.adapter;
 
+
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,7 +21,11 @@ import com.example.birth.myapplication.model.net.bean.BodyItem;
 import com.example.birth.myapplication.model.net.bean.HeadItem;
 import com.example.birth.myapplication.model.net.bean.HomeItem;
 import com.example.birth.myapplication.model.net.bean.PromotionInfo;
+import com.example.birth.myapplication.model.net.bean.Seller;
+import com.example.birth.myapplication.ui.activity.SellerDtailActivity;
 import com.example.birth.myapplication.utils.URLCaseUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -26,14 +33,14 @@ import java.util.List;
  * Created by birth on 2017/7/24.
  */
 
-public class HomtAdapter extends RecyclerView.Adapter {
+public class HomeAdapter extends RecyclerView.Adapter {
 
     private Context context;
     private List<BodyItem> body;
     private HeadItem head;
     private boolean isHeaded;
 
-    public HomtAdapter() {
+    public HomeAdapter() {
         this.context = MyApplication.getContext();
     }
 
@@ -101,6 +108,16 @@ public class HomtAdapter extends RecyclerView.Adapter {
                     @Override
                     public void onClick(View v) {
                         Toast.makeText(context,body.get(position - 1).seller.name, Toast.LENGTH_SHORT).show();
+                        Seller seller = body.get(position - 1).seller;
+                        Intent intent = new Intent(context, SellerDtailActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                        Bundle bundle = new Bundle();
+                        bundle.putString("name",seller.name);
+                        bundle.putInt("id",seller.id);
+                        intent.putExtras(bundle);
+
+                        context.startActivity(intent);
                     }
                 });
                 break;
